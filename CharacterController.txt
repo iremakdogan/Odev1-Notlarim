@@ -1,0 +1,67 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CharacterController : MonoBehaviour
+{
+    [SerializeField] private float speed = 2f;
+    [SerializeField] private float jumpForge = 300f;
+    private Rigidbody2D _rigidbody2D;
+    private Animator _animator;
+    private bool jumping;
+
+
+    private bool grounded;
+    private bool started;
+
+
+    private void Awake()
+    {
+        _rigidbody2D = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>(); //caching
+        grounded = true; //Oyun başladığında yere düşsün
+        //started = true;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            if (started && grounded) //oyun başlamış olduğu ve started ve grounded durumda çalışacak
+            {//yerde ve oyun başladıysa grounded durumuna geçecek
+                _animator.SetTrigger("Jump"); //jump
+                grounded = false;
+                jumping = true;
+            }
+            else //oyun başlamadıysa oyun başladıktan sonra space basınca run eder
+            {
+                _animator.SetBool("GameStarted", true);
+                started = true;
+            }
+        }
+
+    }
+
+    private void FixedUpdate()
+    {
+        if (started)
+        {
+            _rigidbody2D.velocity = new Vector2(speed, _rigidbody2D.velocity.y);
+        }
+
+        if (jumping)
+        {
+            Debug.Log("Jumping");
+            _rigidbody2D.AddForce(new Vector2(0f, jumpForge));
+            jumping = false;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Ground"))//düşmek
+        {
+            grounded = true;//bunu yapınca karakter tekrar ground olması lazım
+        }
+    }
+}
